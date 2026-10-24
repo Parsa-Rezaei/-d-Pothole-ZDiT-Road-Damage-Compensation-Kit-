@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .card { @apply rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6; }
+  .h2 { @apply text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl; }
+  .lbl { @apply mb-1 block text-sm font-semibold text-slate-700; }
+  .hint { @apply mt-1 text-xs text-slate-500; }
+  .inp { @apply block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400/50; }
+  .inp[aria-invalid="true"] { @apply border-red-500 ring-2 ring-red-300; }
+  .chk { @apply mt-0.5 h-5 w-5 shrink-0 accent-amber-600; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-bold transition focus:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-amber-500 text-slate-950 hover:bg-amber-400 focus-visible:ring-amber-300; }
+  .btn-dark { @apply btn bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-400; }
+  .btn-ghost { @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 focus-visible:ring-slate-300; }
+  .pill { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold; }
+  .err { @apply mt-1 text-sm font-semibold text-red-600; }
+  .prose-pl p { @apply mb-3 leading-relaxed text-slate-700; }
+  .prose-pl ul { @apply mb-3 list-disc space-y-1 pl-5 text-slate-700; }
+  .prose-pl ol { @apply mb-3 list-decimal space-y-1 pl-5 text-slate-700; }
+  .prose-pl a { @apply font-semibold text-amber-700 underline underline-offset-2; }
+}
+
+details > summary { list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details[open] .chev { transform: rotate(180deg); }

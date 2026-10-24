@@ -1,0 +1,15 @@
+{
+  "name": "dziura-lodz",
+  "private": true,
+  "description": "Kreator zgłoszenia szkody po wjechaniu w dziurę w drodze w Łodzi (ZDiT / PZU).",
+  "scripts": {
+    "build": "npm run build:css && npm run build:vendor",
+    "build:css": "tailwindcss -c tailwind.config.js -i src/input.css -o assets/styles.css --minify",
+    "build:vendor": "mkdir -p vendor && cp node_modules/pdfmake/build/pdfmake.min.js node_modules/pdfmake/build/vfs_fonts.js vendor/ && sed -i '/sourceMappingURL/d' vendor/pdfmake.min.js",
+    "test": "node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "pdfmake": "0.2.23",
+    "tailwindcss": "3.4.19"
+  }
+}
