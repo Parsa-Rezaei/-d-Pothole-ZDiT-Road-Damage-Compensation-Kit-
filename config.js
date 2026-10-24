@@ -28,6 +28,8 @@ window.SITE_CONFIG = {
   // Adres e-mail, pod który warsztaty mogą pisać, aby wykupić miejsce reklamowe.
   // Puste = ramka "Reklamuj się tutaj" jest ukryta.
   adContactEmail: "",
+  // Telefon dla reklamodawców (pokazywany jako SMS / WhatsApp). Puste = ukryte.
+  adContactPhone: "+48579139744",
 
   // Partnerzy wyświetlani na górze strony. Przykład jednego wpisu:
   // { name: "Wulkanizacja XYZ 24h", text: "Naprawa opon, prostowanie felg. Faktura do zwrotu z PZU.", phone: "+48 600 000 000", url: "https://..." }

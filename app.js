@@ -4,7 +4,7 @@
 
   const CFG = Object.assign({
     paymentUrl: '', paymentReturnsToSite: true, price: '9,99 zł', tipUrl: '',
-    sellerName: '', sellerEmail: '', adContactEmail: '', partners: []
+    sellerName: '', sellerEmail: '', adContactEmail: '', adContactPhone: '', partners: []
   }, window.SITE_CONFIG || {});
 
   // ── Dane domenowe (stan na 10.2026, źródła: uml.lodz.pl, procedura KA-01544, GDDKiA) ──
@@ -184,7 +184,7 @@
   function renderPartners() {
     const el = $('#partners');
     const partners = (CFG.partners || []).filter(p => p && p.name);
-    if (!partners.length && !CFG.adContactEmail) return;
+    if (!partners.length && !CFG.adContactEmail && !CFG.adContactPhone) return;
     let html = '<div class="rounded-2xl border border-amber-300 bg-amber-50 p-4"><div class="mb-2 flex items-center justify-between gap-2"><p class="text-xs font-bold uppercase tracking-wider text-amber-800">Partner lokalny w Łodzi</p><span class="pill bg-amber-200 text-amber-900">Reklama</span></div><div class="grid gap-3 sm:grid-cols-2">';
     for (const p of partners) {
       const tel = p.phone ? `<a class="btn-dark mt-2 w-full text-sm" href="tel:${esc(p.phone.replace(/[^\d+]/g, ''))}">📞 Zadzwoń: ${esc(p.phone)}</a>` : '';
@@ -195,7 +195,14 @@
       html += '<div class="rounded-xl bg-white p-3 shadow-sm sm:col-span-2"><p class="font-extrabold">Całodobowa wulkanizacja, prostowanie felg, pomoc drogowa w Łodzi?</p><p class="mt-0.5 text-sm text-slate-600">To miejsce widzą kierowcy, którzy właśnie uszkodzili koło na łódzkiej dziurze.</p></div>';
     }
     html += '</div>';
-    if (CFG.adContactEmail) html += `<p class="mt-2 text-xs text-amber-900">Masz warsztat w Łodzi? <a class="font-bold underline" href="mailto:${esc(CFG.adContactEmail)}?subject=${encodeURIComponent('Reklama na stronie DziuraŁódź')}">Zarezerwuj to miejsce</a></p>`;
+    const adLinks = [];
+    if (CFG.adContactPhone) {
+      const digits = CFG.adContactPhone.replace(/[^\d]/g, '');
+      const msg = encodeURIComponent('Dzień dobry, chcę zarezerwować reklamę na stronie DziuraŁódź.');
+      adLinks.push(`<a class="font-bold underline" href="https://wa.me/${digits}?text=${msg}" target="_blank" rel="noopener">WhatsApp</a>`, `<a class="font-bold underline" href="sms:+${digits}?body=${msg}">SMS ${esc(CFG.adContactPhone)}</a>`);
+    }
+    if (CFG.adContactEmail) adLinks.push(`<a class="font-bold underline" href="mailto:${esc(CFG.adContactEmail)}?subject=${encodeURIComponent('Reklama na stronie DziuraŁódź')}">e-mail</a>`);
+    if (adLinks.length) html += `<p class="mt-2 text-xs text-amber-900">Masz warsztat, wulkanizację lub pomoc drogową w Łodzi? Zarezerwuj to miejsce: ${adLinks.join(' · ')} (preferowany kontakt pisemny)</p>`;
     html += '</div>';
     el.innerHTML = html;
     el.classList.remove('hidden');

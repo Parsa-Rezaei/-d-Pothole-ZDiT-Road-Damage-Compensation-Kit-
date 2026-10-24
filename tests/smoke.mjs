@@ -50,7 +50,7 @@ check((await page.title()).includes('Odszkodowanie za dziurę w drodze Łódź')
 check(await page.locator('h1').innerText() === 'Odszkodowanie za dziurę w drodze w Łodzi', 'nagłówek H1');
 const ld = await page.$$eval('script[type="application/ld+json"]', s => s.map(x => JSON.parse(x.textContent)['@type']));
 check(ld.includes('FAQPage') && ld.includes('SoftwareApplication'), 'JSON-LD poprawny (FAQPage + SoftwareApplication)');
-check(await page.locator('#partners').isHidden(), 'ramka partnera ukryta przy pustej konfiguracji');
+check((await page.locator('#partners').innerText()).includes('WhatsApp'), 'ramka reklamowa z kontaktem SMS/WhatsApp');
 
 await page.locator('input[name="road_type"][value="city"]').check();
 check((await page.locator('#juris-result').innerText()).includes('Zgłaszasz do ZDiT'), 'Krok 0: droga w Łodzi → ZDiT');
