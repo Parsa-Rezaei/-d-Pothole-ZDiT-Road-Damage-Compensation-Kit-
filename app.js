@@ -33,6 +33,8 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const num = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : 0; };
+  // Tylko adresy https:// (http tylko dla lokalnych testów) – blokuje javascript:, data: itp. w linkach z konfiguracji.
+  const safeUrl = u => { try { const x = new URL(String(u || '')); return x.protocol === 'https:' || (x.protocol === 'http:' && x.hostname === '127.0.0.1') ? x.href : ''; } catch { return ''; } };
   const has = v => v !== undefined && v !== null && String(v).trim() !== '';
   const PLN = new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' });
   const money = v => PLN.format(v || 0);
@@ -188,7 +190,7 @@
     let html = '<div class="rounded-2xl border border-amber-300 bg-amber-50 p-4"><div class="mb-2 flex items-center justify-between gap-2"><p class="text-xs font-bold uppercase tracking-wider text-amber-800">Partner lokalny w Łodzi</p><span class="pill bg-amber-200 text-amber-900">Reklama</span></div><div class="grid gap-3 sm:grid-cols-2">';
     for (const p of partners) {
       const tel = p.phone ? `<a class="btn-dark mt-2 w-full text-sm" href="tel:${esc(p.phone.replace(/[^\d+]/g, ''))}">📞 Zadzwoń: ${esc(p.phone)}</a>` : '';
-      const url = p.url ? `<a class="mt-1 block text-center text-sm font-semibold text-amber-800 underline" href="${esc(p.url)}" rel="sponsored noopener" target="_blank">Strona partnera</a>` : '';
+      const url = safeUrl(p.url) ? `<a class="mt-1 block text-center text-sm font-semibold text-amber-800 underline" href="${esc(safeUrl(p.url))}" rel="sponsored noopener noreferrer" target="_blank">Strona partnera</a>` : '';
       html += `<div class="rounded-xl bg-white p-3 shadow-sm"><p class="font-extrabold">${esc(p.name)}</p>${p.text ? `<p class="mt-0.5 text-sm text-slate-600">${esc(p.text)}</p>` : ''}${tel}${url}</div>`;
     }
     if (!partners.length) {
@@ -199,7 +201,7 @@
     if (CFG.adContactPhone) {
       const digits = CFG.adContactPhone.replace(/[^\d]/g, '');
       const msg = encodeURIComponent('Dzień dobry, chcę zarezerwować reklamę na stronie DziuraŁódź.');
-      adLinks.push(`<a class="font-bold underline" href="https://wa.me/${digits}?text=${msg}" target="_blank" rel="noopener">WhatsApp</a>`, `<a class="font-bold underline" href="sms:+${digits}?body=${msg}">SMS ${esc(CFG.adContactPhone)}</a>`);
+      adLinks.push(`<a class="font-bold underline" href="https://wa.me/${digits}?text=${msg}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`, `<a class="font-bold underline" href="sms:+${digits}?body=${msg}">SMS ${esc(CFG.adContactPhone)}</a>`);
     }
     if (CFG.adContactEmail) adLinks.push(`<a class="font-bold underline" href="mailto:${esc(CFG.adContactEmail)}?subject=${encodeURIComponent('Reklama na stronie DziuraŁódź')}">e-mail</a>`);
     if (adLinks.length) html += `<p class="mt-2 text-xs text-amber-900">Masz warsztat, wulkanizację lub pomoc drogową w Łodzi? Zarezerwuj to miejsce: ${adLinks.join(' · ')} (preferowany kontakt pisemny)</p>`;
@@ -705,12 +707,12 @@
 
   // ── Płatność ──
   let returnedFromPayment = false;
-  const paidMode = () => has(CFG.paymentUrl);
+  const paidMode = () => has(safeUrl(CFG.paymentUrl));
   const isPaid = () => store.get(PAID_KEY) === '1';
   function renderDownloadNote() {
     const note = $('#download-note');
     if (!paidMode()) {
-      note.innerHTML = 'Bezpłatnie.' + (has(CFG.tipUrl) ? ` Pomogło? <a class="font-semibold underline" href="${esc(CFG.tipUrl)}" target="_blank" rel="noopener">Postaw kawę autorowi</a>.` : '');
+      note.innerHTML = 'Bezpłatnie.' + (safeUrl(CFG.tipUrl) ? ` Pomogło? <a class="font-semibold underline" href="${esc(safeUrl(CFG.tipUrl))}" target="_blank" rel="noopener noreferrer">Postaw kawę autorowi</a>.` : '');
       return;
     }
     note.textContent = isPaid() ? 'Opłacono – możesz pobierać PDF bez limitu w tej karcie.' : `Podgląd jest bezpłatny. Pakiet PDF: ${CFG.price} (BLIK / karta).`;
@@ -751,9 +753,9 @@
       if (!$('#pay-consent').checked) return;
       if (CFG.paymentReturnsToSite) {
         saveNow();
-        location.href = CFG.paymentUrl;
+        location.href = safeUrl(CFG.paymentUrl);
       } else {
-        window.open(CFG.paymentUrl, '_blank', 'noopener');
+        window.open(safeUrl(CFG.paymentUrl), '_blank', 'noopener,noreferrer');
         $('#pay-done').classList.remove('hidden');
       }
     });
@@ -785,6 +787,8 @@
 
   // ── Start ──
   function init() {
+    // Ochrona przed osadzeniem strony w cudzej ramce (clickjacking) – GitHub Pages nie pozwala ustawić nagłówka.
+    if (window.top !== window.self) { document.body.innerHTML = ''; try { window.top.location = window.location.href; } catch { /* zablokowane */ } return; }
     load();
     bindInputs();
     bindPhotos();
